@@ -469,12 +469,6 @@ Examples
     ```xml
     <depends>com.intellij.modules.java</depends>
     ```
-- Optional plugin dependency:
-    ```xml
-    <depends optional="true">
-      com.example.dependencypluginid
-    </depends>
-    ```
 - Required module dependency with additional configuration:
     ```xml
     <depends
