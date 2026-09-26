@@ -284,20 +284,21 @@ Attributes
   The lowest IDE version compatible with the plugin.
 - `until-build` _(optional)_<br/>
   The highest version of the IDE the plugin is compatible with.
-  It's highly recommended not to set this attribute, so the plugin will be compatible with all the IDEs since the version 
-  specified by the `since-build`.
-  If it becomes necessary to specify the highest compatible IDE version later, it'll be possible to do that via the 
-  Marketplace.
-  Only if the publishing process for the plugin is configured to upload a new version of a plugin for each major IDE 
-  version, it makes sense to limit the highest compatible IDE version from the beginning. 
+  It's highly recommended not to set this attribute, so the plugin will be compatible with all IDE versions since the 
+  version specified by the `since-build`.<br/>
+  If it becomes necessary to specify the highest compatible IDE version later, it'll be possible to do that via JetBrains
+  Marketplace.<br/>
+  Only if the publishing process for the plugin is configured to upload a new version for each major IDE version, it makes
+  sense to limit the highest compatible IDE version from the beginning. 
   In that case, use `strict-until-build` instead.
 - `strict-until-build` _(optional; available since 2025.3)_<br/>
 
-    The highest version of the IDE the plugin is compatible with.
-    Use this attribute only if the publishing process for the plugin is configured to upload a new version of a plugin for 
-    each major IDE version.
-    Otherwise, omit this attribute. If it becomes necessary to specify the highest compatible IDE version later, it'll be 
-    possible to do that via the Marketplace.
+    The highest version of the IDE the plugin is compatible with.<br/>
+    Use this attribute only if the publishing process for the plugin is configured to upload a new version for each major
+    IDE version.
+    Otherwise, skip this attribute.<br/>
+    If it becomes necessary to specify the highest compatible IDE version later, it'll be possible to do that via
+    JetBrains Marketplace.
 
 Examples
 :
