@@ -44,6 +44,7 @@ Deprecated elements are omitted in the list below.
 
 - [`<idea-plugin>`](#idea-plugin)
   - [`<id>`](#idea-plugin__id)
+  - [`<module>`](#idea-plugin__module)  ![Internal][internal]
   - [`<name>`](#idea-plugin__name)
   - [`<version>`](#idea-plugin__version)
   - [`<product-descriptor>`](#idea-plugin__product-descriptor)
@@ -52,7 +53,12 @@ Deprecated elements are omitted in the list below.
   - [`<description>`](#idea-plugin__description)
   - [`<change-notes>`](#idea-plugin__change-notes)
   - [`<depends>`](#idea-plugin__depends)
+  - [`<dependencies>`](#idea-plugin__dependencies)
+    - [`<module>`](#idea-plugin__dependencies__module)
+    - [`<plugin>`](#idea-plugin__dependencies__plugin)
   - [`<incompatible-with>`](#idea-plugin__incompatible-with)
+  - [`<content>`](#idea-plugin__content)
+    - [`<module>`](#idea-plugin__content__module)
   - [`<extensions>`](#idea-plugin__extensions)
     - [An Extension](#idea-plugin__extensions__-)
   - [`<extensionPoints>`](#idea-plugin__extensionPoints)
@@ -79,10 +85,12 @@ Deprecated elements are omitted in the list below.
       - [`<override-text>`](#idea-plugin__actions__action__override-text)
       - [`<reference>`](#idea-plugin__actions__group__reference)
         - [`<add-to-group>`](#idea-plugin__actions__action__add-to-group)
+        - [`<synonym>`](#idea-plugin__actions__action__synonym)
       - [`<separator>`](#idea-plugin__actions__group__separator)
         - [`<add-to-group>`](#idea-plugin__actions__action__add-to-group)
     - [`<reference>`](#idea-plugin__actions__group__reference)
       - [`<add-to-group>`](#idea-plugin__actions__action__add-to-group)
+      - [`<synonym>`](#idea-plugin__actions__action__synonym)
   - [`<applicationListeners>`](#idea-plugin__applicationListeners)
     - [`<listener>`](#idea-plugin__applicationListeners__listener)
   - [`<projectListeners>`](#idea-plugin__projectListeners)
@@ -107,16 +115,27 @@ Attributes
   The link to the plugin homepage displayed on the plugin page in
   the [JetBrains Marketplace](https://plugins.jetbrains.com).
 - `require-restart` _(optional)_<br/>
+  The boolean value determining whether the plugin installation, update, or uninstallation requires an IDE restart
+  (see [Dynamic Plugins](dynamic_plugins.md) for details).<br/>
+  Default value: `false`.
+- `visibility` _(optional)_<br/>
 
-    The boolean value determining whether the plugin installation, update, or uninstallation requires an IDE restart
-    (see [Dynamic Plugins](dynamic_plugins.md) for details).<br/>
-    Default value: `false`.
+    Specifies the visibility of the content module (not applicable for `plugin.xml` descriptors).
+    The visibility determines which modules may declare a dependency on this module.
+    
+    Allowed values:
+    - `private` - the module is visible only inside the plugin where it's defined
+    - `internal` - the module is visible only from content modules declared in the same namespace
+    - `public` - the module is visible from all content modules of all plugins<br/>
+    Default value: `private`.
 
 Children
 :
   - [`<actions>`](#idea-plugin__actions)
   - [`<applicationListeners>`](#idea-plugin__applicationListeners)
   - [`<change-notes>`](#idea-plugin__change-notes)
+  - [`<content>`](#idea-plugin__content)
+  - [`<dependencies>`](#idea-plugin__dependencies)
   - [`<depends>`](#idea-plugin__depends)
   - [`<description>`](#idea-plugin__description)
   - [`<extensionPoints>`](#idea-plugin__extensionPoints)
@@ -124,6 +143,7 @@ Children
   - [`<id>`](#idea-plugin__id)
   - [`<idea-version>`](#idea-plugin__idea-version)
   - [`<incompatible-with>`](#idea-plugin__incompatible-with)
+  - [`<module>`](#idea-plugin__module)  ![Internal][internal]
   - [`<name>`](#idea-plugin__name)
   - [`<product-descriptor>`](#idea-plugin__product-descriptor)
   - [`<projectListeners>`](#idea-plugin__projectListeners)
@@ -165,6 +185,37 @@ Example
   ```xml
   <id>com.example.framework</id>
   ```
+
+### `module`
+{#idea-plugin__module}
+
+> This item is part of the _Plugin Model V2_,
+> which is not recommended to be used in third-party plugins in the current state.
+>
+{style="warning"}
+
+Defines the current plugin's alias.
+
+The alias can be used instead of the plugin [ID](#idea-plugin__id) in [`depends`](#idea-plugin__depends)
+or `dependencies/plugin@id`.
+
+Aliases are usually added to core plugins and work as markers of the corresponding IDEs.
+For example, `com.intellij.modules.ruby-capable` alias is declared in core plugins for IntelliJ IDEA Ultimate and RubyMine,
+and the Ruby plugin has a dependency on that alias.
+It makes the Ruby plugin compatible with IntelliJ IDEA Ultimate and RubyMine only and prevents it from being installed in other IDEs.
+
+Aliases can be also used for compatibility reasons in regular plugins and modules.
+
+Avoid adding new aliases and using them for other reasons.
+
+
+
+{type="narrow"}
+Attributes
+:
+- `value` _(**required**)_<br/>
+
+    The alias value. It must be unique.
 
 ### `name`
 {#idea-plugin__name}
@@ -284,20 +335,21 @@ Attributes
   The lowest IDE version compatible with the plugin.
 - `until-build` _(optional)_<br/>
   The highest version of the IDE the plugin is compatible with.
-  It's highly recommended not to set this attribute, so the plugin will be compatible with all the IDEs since the version 
-  specified by the `since-build`.
-  If it becomes necessary to specify the highest compatible IDE version later, it'll be possible to do that via the 
-  Marketplace.
-  Only if the publishing process for the plugin is configured to upload a new version of a plugin for each major IDE 
-  version, it makes sense to limit the highest compatible IDE version from the beginning. 
+  It's highly recommended not to set this attribute, so the plugin will be compatible with all IDE versions since the 
+  version specified by the `since-build`.<br/>
+  If it becomes necessary to specify the highest compatible IDE version later, it'll be possible to do that via JetBrains
+  Marketplace.<br/>
+  Only if the publishing process for the plugin is configured to upload a new version for each major IDE version, it makes
+  sense to limit the highest compatible IDE version from the beginning. 
   In that case, use `strict-until-build` instead.
 - `strict-until-build` _(optional; available since 2025.3)_<br/>
 
-    The highest version of the IDE the plugin is compatible with.
-    Use this attribute only if the publishing process for the plugin is configured to upload a new version of a plugin for 
-    each major IDE version.
-    Otherwise, omit this attribute. If it becomes necessary to specify the highest compatible IDE version later, it'll be 
-    possible to do that via the Marketplace.
+    The highest version of the IDE the plugin is compatible with.<br/>
+    Use this attribute only if the publishing process for the plugin is configured to upload a new version for each major
+    IDE version.
+    Otherwise, skip this attribute.<br/>
+    If it becomes necessary to specify the highest compatible IDE version later, it'll be possible to do that via
+    JetBrains Marketplace.
 
 Examples
 :
@@ -496,6 +548,75 @@ Examples
     </depends>
     ```
 
+### `dependencies`
+{#idea-plugin__dependencies}
+
+Defines the dependencies of the module.
+
+A dependency from an `optional` or `on-demand`
+[content](#idea-plugin__content) [module](#idea-plugin__content__module)
+to the main module of the containing plugin is added automatically.
+
+Circular dependencies aren't allowed: if a set of modules forms a dependency cycle, plugins which contain modules
+from the cycle will fail to load.
+
+
+Children
+:
+  - [`<module>`](#idea-plugin__dependencies__module)
+  - [`<plugin>`](#idea-plugin__dependencies__plugin)
+
+#### `module`
+{#idea-plugin__dependencies__module}
+
+A dependency on another module.
+
+
+
+{type="narrow"}
+Attributes
+:
+- `name` _(**required**)_<br/>
+  The name of the module to depend on.
+- `namespace`
+
+    Specifies the namespace where the referenced module is defined. 
+    
+    If the namespace is not specified explicitly, the dependency is resolved as follows:
+    - if a content module with the specified name exists in
+      the plugin where the current module is defined, the dependency resolved to that module.
+    - otherwise, the module is searched in the default `jetbrains` namespace.
+
+Example
+:
+  ```xml
+  <dependencies>
+    <module name="com.example.core"/>
+  </dependencies>
+  ```
+
+#### `plugin`
+{#idea-plugin__dependencies__plugin}
+
+Declares a dependency on the main module of another plugin.
+
+
+
+{type="narrow"}
+Attributes
+:
+- `id` _(**required**)_<br/>
+
+    The [ID](#idea-plugin__id) or [alias](#idea-plugin__module) of the plugin to depend on.
+
+Example
+:
+  ```xml
+  <dependencies>
+    <plugin id="com.example.plugin.id"/>
+  </dependencies>
+  ```
+
 ### `incompatible-with`
 {#idea-plugin__incompatible-with}
 
@@ -528,6 +649,106 @@ Examples
         <incompatible-with>
           com.intellij.modules.appcode.ide
         </incompatible-with>
+    ```
+
+### `content`
+{#idea-plugin__content}
+
+Defines the content modules of the plugin.
+
+The module which contains the plugin descriptor (<path>plugin.xml</path>) is included implicitly.
+
+{type="narrow"}
+Required
+: no
+
+
+{type="narrow"}
+Attributes
+:
+- `namespace`
+
+    Specifies the namespace for content modules. 
+    
+    If all content modules have private visibility (this is the default), the namespace is not required.
+    However, if at least one non-private content module is defined, the namespace must be set.
+    
+    If the namespace is set, it must be associated with the plugin's vendor at the Marketplace. 
+    Plugins developed by JetBrains may use the `jetbrains` namespace.
+    
+    A namespace must contain only Latin letters, numbers, dashes and underscores. 
+    It cannot start or end with a dash or underscore, and it cannot contain multiple consecutive dashes or underscores.
+    Its length is between 5 and 30 characters, inclusive.
+    
+    If there are multiple [`<content>`](#idea-plugin__content) tags in the plugin descriptor, the namespace must be the same for all of them.
+
+Children
+:
+  - [`<module>`](#idea-plugin__content__module)
+
+Example
+:
+  ```xml
+  <content>
+    <module name="com.example.core" loading="required"/>
+    <module name="com.example.git"/>
+    <module name="com.example.i18n"/>
+  </content>
+  ```
+
+#### `module`
+{#idea-plugin__content__module}
+
+A content module to include in the plugin.<br/>
+Content modules contain components implementing the plugin functionality.
+Each content module's components are loaded with its own classloader (unless overridden with
+`loading="embedded"`).
+
+{type="narrow"}
+Required
+: no
+
+
+{type="narrow"}
+Attributes
+:
+- `name` _(**required**)_<br/>
+  The name of a JPS module to include in the plugin.
+- `loading`
+  Specifies when a content module of a plugin should be loaded.
+  Allowed values:
+    - `required` - the module is a required part of the plugin.
+      If the module cannot be loaded because some of its dependencies aren't available, the whole plugin isn't
+      loaded, and an error is shown to the user.
+    - `embedded` - the same as `required`, but also puts the module's classes to the main plugin JAR and loads them
+      using the main plugin classloader.
+      **This is an internal temporary option added to simplify the migration of some existing plugins.
+      For new modules, use `required` instead.**
+    - `optional` - the module is an optional part of the plugin.
+      If the module cannot be loaded, it is skipped and doesn't prevent other modules from the plugin from being
+      loaded.
+    - `on-demand` - the module is used by other modules of the plugin and doesn't provide user-visible functionality
+      itself.
+      The module is loaded if and only if another `required` or `optional` module, which depends on it, is loaded.
+      **Effective since 2026.3**; in older versions, it behaves the same way as `optional`.<br/>
+  Default value: `optional`.
+- `required-if-available`
+
+    Specifies a condition when the loading rule should be restricted to 'required' instead of the rule given by the 'loading' attribute.
+    The value of the attribute may reference one of the special content modules that reflect the configuration of the IDE:
+    - `intellij.platform.frontend`
+    - `intellij.platform.backend`
+    - `intellij.platform.frontend.split`
+
+Examples
+:
+- A module with the implicit `optional` `loading` behavior:
+    ```xml
+    <module name="com.example.core"/>
+    ```
+- A required module that will fail to load the plugin if it is unavailable:
+    ```xml
+    <module name="com.example.core" loading="required"/>
     ```
 
 ### `extensions`
@@ -1277,9 +1498,12 @@ of the [`<actions>`](#idea-plugin__actions) element:
 ##### `reference`
 {#idea-plugin__actions__group__reference}
 
-Allows adding an existing action to the group.
-The element can be used directly under the [`<actions>`](#idea-plugin__actions) element, or in
-the [`<group>`](#idea-plugin__actions__group) element.
+Refers to an existing action.
+The element can be used in:
+- the [`<actions>`](#idea-plugin__actions) element - must contain
+  the [`<add-to-group>`](#idea-plugin__actions__action__add-to-group) element adding the referenced action to a group,
+  the [`<synonym>`](#idea-plugin__actions__action__synonym) element adding a synonym to the referenced action, or both.
+- the [`<group>`](#idea-plugin__actions__group) element - adds the referenced action to the group.
 
 {type="narrow"}
 Required
@@ -1299,6 +1523,7 @@ Attributes
 Children
 :
   - [`<add-to-group>`](#idea-plugin__actions__action__add-to-group)
+  - [`<synonym>`](#idea-plugin__actions__action__synonym)
 
 Examples
 :
@@ -1314,7 +1539,15 @@ Examples
       <reference ref="com.example.MyAction">
         <add-to-group group-id="ToolsMenu"/>
       </reference>
-    </group>
+    </actions>
+    ```
+- A synonym added to an existing action:
+    ```xml
+    <actions>
+      <reference ref="EditorCopy">
+        <synonym text="Copy to Clipboard"/>
+      </reference>
+    </actions>
     ```
 
 ##### `separator`
